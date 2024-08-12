@@ -4,6 +4,7 @@ import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
 const App = () => {
   const [input, setInput] = useState('');
   const [resultado, setResultado] = useState('');
+  const [activeButton, setActiveButton] = useState(null);
 
   const handlePress = (value) => {
     setInput(input + value);
@@ -22,54 +23,33 @@ const App = () => {
     }
   };
 
+  const handleMouseEnter = (index) => {
+    setActiveButton(index);
+  };
+
+  const handleMouseLeave = () => {
+    setActiveButton(null);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.visor}>{input || '0'}</Text>
       <Text style={styles.resultado}>Resultado: {resultado}</Text>
-      <View style={styles.buttonRow}>
-        {[1,2,3].map((num) => (
-          <TouchableOpacity key={num} style={styles.button} onPress={() => handlePress(num.toString())}>
-            <Text style={styles.buttonText}>{num}</Text>
-          </TouchableOpacity>
-        ))}
-        <TouchableOpacity style={styles.button} onPress={() => handlePress('+')}>
-          <Text style={styles.buttonText}>+</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.buttonRow}>
-        {[4,5,6].map((num) => (
-          <TouchableOpacity key={num} style={styles.button} onPress={() => handlePress(num.toString())}>
-            <Text style={styles.buttonText}>{num}</Text>
-          </TouchableOpacity>
-        ))}
-        <TouchableOpacity style={styles.button} onPress={() => handlePress('-')}>
-          <Text style={styles.buttonText}>-</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.buttonRow}>
-        {[7,8,9].map((num) => (
-          <TouchableOpacity key={num} style={styles.button} onPress={() => handlePress(num.toString())}>
-            <Text style={styles.buttonText}>{num}</Text>
-          </TouchableOpacity>
-        ))}
-        <TouchableOpacity style={styles.button} onPress={() => handlePress('*')}>
-          <Text style={styles.buttonText}>*</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.buttonRow}>
-        <TouchableOpacity style={styles.button} onPress={calculateResult}>
-          <Text style={styles.buttonText}>=</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => handlePress('0')}>
-          <Text style={styles.buttonText}>0</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => handlePress('/')}>
-          <Text style={styles.buttonText}>/</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={clearInput}>
-          <Text style={styles.buttonText}>C</Text>
-        </TouchableOpacity>
-      </View>
+      {[['1', '2', '3', '+'], ['4', '5', '6', '-'], ['7', '8', '9', '*'], ['=', '0', '/', 'C']].map((row, rowIndex) => (
+        <View key={rowIndex} style={styles.buttonRow}>
+          {row.map((value, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[styles.button, activeButton === `${rowIndex}-${index}` && styles.shadow]}
+              onPress={() => (value === 'C' ? clearInput() : value === '=' ? calculateResult() : handlePress(value))}
+              onMouseEnter={() => handleMouseEnter(`${rowIndex}-${index}`)}
+              onMouseLeave={handleMouseLeave}
+            >
+              <Text style={styles.buttonText}>{value}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      ))}
     </View>
   );
 };
@@ -108,6 +88,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     margin: 5,
     borderRadius: 50,
+  },
+  shadow: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
   },
   buttonText: {
     fontSize: 20,
